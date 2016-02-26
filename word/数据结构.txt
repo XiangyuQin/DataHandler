@@ -1,0 +1,86 @@
+
+输入
+    redis
+    
+    factor:hash
+    key:factors
+    field:
+        time value:最近录入文章的editTime(str)
+    
+    mysql
+
+    CREATE TABLE `puahome_bbs` (
+    `id` int(11) NOT NULL AUTO_INCREMENT,
+    `title` varchar(255) CHARACTER SET utf8 DEFAULT NULL,
+    `writer` varchar(255) CHARACTER SET utf8 DEFAULT NULL,
+    `content` text CHARACTER SET utf8,
+    `editdate` datetime DEFAULT NULL,
+    `createtime` datetime DEFAULT NULL,
+    `url` varchar(255) CHARACTER SET utf8 DEFAULT NULL,
+    `listurl` varchar(255) CHARACTER SET utf8 DEFAULT NULL,
+    `commentnum` int(11) DEFAULT NULL,
+    `readnum` int(11) DEFAULT NULL,
+    `supportnum` int(11) DEFAULT NULL,
+    `collectnum` int(11) DEFAULT NULL,
+    PRIMARY KEY (`id`)
+    );
+
+    images
+        id
+        url
+        type:1：cover；2：content
+        sourceArticles：哪篇文章在使用
+        ifused
+        ifdown
+    
+    
+输出：
+    redis
+    
+    Articles:hash
+    key:articles
+    field:
+        id
+        url
+        editdate value:editTime
+        createTime value:createTime
+        level value:level
+        len value:len
+        ctr value:ctr
+        pn value:pn
+        pv value:pv
+        image value:image number
+    
+    factor:hash
+    key:factors
+    field:
+        time value:editTime
+        
+    
+    mysql
+    
+    articles：
+	    article={
+			"id":"9",
+            "title":"(not null)",
+            "url"
+            "image":"/static/images/website5.jpg",
+            "date":editTime,
+            "brief":"现在有的只有厌烦，之前的所有兴趣都成为过去。(not null)",
+            "type_id":"1",
+            "writer":"aboutLove(not null)",
+            "content":"不要纠结于过去，承认你们的关系已经破裂。(not null)",
+        }
+        
+        images
+            id
+            url:web地址
+            src：本地地址
+            type:1：cover；2：content
+            sourceArticles：哪篇文章在使用
+            ifused
+            ifdown
+    
+    
+    
+    
