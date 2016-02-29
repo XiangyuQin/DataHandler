@@ -1,0 +1,40 @@
+article{
+    width: 800px;
+}
+article h1{
+    font-size: 24px;
+}
+article .section_content{
+    font-size: 16px;
+    border-top:1px solid #C9C9CA
+}
+
+article .section_content section span{
+    color:#8C8CA8;
+    margin-right: 20px;
+}
+
+article .section_content section{
+    width: 100%;
+}
+
+section .article_brief{
+    font-size: 16px;
+    line-height: 200%;
+    font-weight:bold;
+}
+section .article_content{
+    font-size: 16px;
+    line-height: 200%;
+}
+.article_image{
+    float: left;
+    margin: 5px 0px;
+    width: 100%;
+    text-align:center;
+}
+.article_image img{
+    max-width:100%;
+    max-height:100%;
+    vertical-align:middle;
+}

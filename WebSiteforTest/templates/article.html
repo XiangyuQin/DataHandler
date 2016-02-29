@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+{% extends "main.html" %}
+{% block head %}
+<meta charset="UTF-8">
+<link rel="stylesheet" type="text/css" href="{{ static_url('css/style.css')}}" />
+<link rel="stylesheet" type="text/css" href="{{ static_url('css/style_article.css')}}" />
+<title>{{ article["title"] }}</title>
+{% end %}
+{% block body %}
+<header>
+</header>
+<nav>
+</nav>
+<div class="main">
+    <article>
+        <h1>{{ article["title"] }}</h1>
+        <section class="section_content">
+            <section>
+                <span>{{ article["date"] }}</span>
+                {% if article["writer"] != "" %}
+                <span>作者：{{ article["writer"] }}</span>
+                {% end %}
+            </section>
+            {% if article["image"] !="" %}
+            <div class="article_image">
+                <img src="{{ article['image'] }}" alt="cover2" onload="this.width=screen.width;"/>
+            </div>
+            {% end %}
+            <section>
+                <p class="article_brief">{{ article["brief"] }}</p>
+            </section>
+            <section>
+                {% autoescape None %}
+                {{ article["content"] }}
+            </section>
+        </section>
+    </article>
+</div>
+<footer>
+</footer>
+{% end %}
