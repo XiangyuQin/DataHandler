@@ -4,9 +4,11 @@ import MySQLdb
 import common
 import config
 import MySQLdb.cursors
+from Log import Log
 
 class MysqlService(object):
-    def __init__(self):
+    def __init__(self, log):
+        self.log = log
         self.db = MySQLdb.connect("localhost","root", "qinxiangyu", "spider",charset='utf8', cursorclass = MySQLdb.cursors.DictCursor)
 
     def getArticles(self, date):
@@ -15,11 +17,13 @@ class MysqlService(object):
         try:
             cursor.execute(sql)
             results = cursor.fetchall()
+            '''
             for row in results:
                 print common.datetime_toString(row['editdate'])
+            '''
             return results
         except Exception as e:
-            print "getArticles: %s" % (e)
+            self.log.printError("getArticles: %s" % (e))
             return []
     
     def getImages(self, num):
@@ -30,7 +34,7 @@ class MysqlService(object):
             results = cursor.fetchall()
             return results
         except Exception as e:
-            print "getImages: %s" % (e)
+            self.log.printError("getImages: %s" % (e))
             return []
             
     def setArticles(self, articles):
@@ -47,8 +51,7 @@ class MysqlService(object):
                 self.db.commit()
             return True
         except Exception as e:
-            print "setArticles: %s" % (e)
-            print "sql: %s" % (sql_test)
+            self.log.printError("setArticles: %s" % (e))
             return False
             
     def updateImages(self, images):
@@ -61,7 +64,7 @@ class MysqlService(object):
                 self.db.commit()
             return True
         except Exception as e:
-            print "updateImages: %s" % (e)
+            self.log.printError("updateImages: %s" % (e))
             return False
     
     def setImages(self, images):
@@ -76,7 +79,7 @@ class MysqlService(object):
                 self.db.commit()
             return True
         except Exception as e:
-            print "setImages: %s" % (e)
+            self.log.printError("setImages: %s" % (e))
             return False
             
     def closeDb(self):

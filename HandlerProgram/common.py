@@ -3,6 +3,9 @@ import datetime
 import time
 def datetime_toString(dt):
     return dt.strftime("%Y-%m-%d")
+    
+def datetime_toStringYMDHMS(dt):
+    return dt.strftime("%Y%m%d%H%M%S")
         
 def string_toDatetime(str):
     return time.strptime(str, "%Y-%m-%d")

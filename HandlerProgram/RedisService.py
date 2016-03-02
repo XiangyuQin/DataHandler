@@ -1,9 +1,11 @@
 ﻿# -*- coding: UTF-8 -*-
 import redis
 import common
+from Log import Log
 
 class RedisService(object):
-    def __init__(self):
+    def __init__(self, log):
+        self.log = log
         self.r = redis.Redis(host='localhost', port=6379, db=0)
         
 
@@ -13,11 +15,10 @@ class RedisService(object):
     
     def setFactors(self, factors):
         try:
-            print factors["time"]
             time = common.datetime_toString(factors["time"])
             factors = self.r.hset('factors', 'time' , time)
         except Exception as e:
-            print "setFactors: %s" % (e)
+            self.log.printError("setFactors: %s" % (e))
         
     def hsetArticles(self, articles):
         try:
@@ -25,7 +26,7 @@ class RedisService(object):
                 self.r.hset('articles', article['id'], article)
             return True
         except Exception as e:
-            print "hsetArticles: %s" % (e)
+            self.log.printError("hsetArticles: %s" % (e))
             return False
             
 

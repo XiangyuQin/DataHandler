@@ -9,6 +9,7 @@ import re
 import datetime
 from MysqlService import MysqlService
 from RedisService import RedisService
+from Log import Log
 
 class Application(object):
     '''Application Class handlerData from Spider
@@ -23,16 +24,22 @@ class Application(object):
     '''
     
     def __init__(self):
-        self.factors={}
-        self.images=[]
-        self.contentImages=[]
+        self.factors = {}
+        self.images = []
+        self.contentImages = []
         self.now=datetime.datetime.now()
+        self.log = Log(self.now)
 
     def run(self):
+        nowStr=common.datetime_toStringYMDHMS(self.now)
+        self.log.printInfo("program start,now:%s" %(nowStr))
         articles=self.loadData()
         if (articles!=None or len(articles)>0):
             processedArticles=self.handleArticles(articles)
             self.outputData(processedArticles)
+            self.log.printInfo("processedArticles:%d, contentImages:%d, images:%d, factorsTime:%s" 
+            %(len(processedArticles), len(self.contentImages), len(self.images), self.factors['time']))
+        self.log.printInfo("program end,now:%s" %(nowStr))
 
 
     def loadData(self):
@@ -45,16 +52,17 @@ class Application(object):
         returns:
             qualifiedArticles:the program is going to handle these program
         '''
-        
+        self.log.printInfo("loadData start")
         self.factors=self.loadFactors()
         articles=self.loadArticles(self.factors['time'])
         qualifiedArticles,num=self.articlesFilter(articles, self.factors)
         self.images=self.loadImages(num)
+        self.log.printInfo("loadData end,qualifiedArticles:%d" %(len(qualifiedArticles)))
         return qualifiedArticles
         
     def loadArticles(self, time):
         strTime = self.checkTime(time)
-        service = MysqlService()
+        service = MysqlService(self.log)
         articles = service.getArticles(strTime)
         return articles
 
@@ -71,10 +79,10 @@ class Application(object):
         if isinstance(time, str):
             return time
         else:
-            return "1970-01-17"
+            return config.defaultFactorsTime
         
     def loadFactors(self):
-        service = RedisService()
+        service = RedisService(self.log)
         factors = service.getFactors()
         return factors
     
@@ -92,31 +100,33 @@ class Application(object):
         return qualifiedArticles, len(qualifiedArticles)
         
     def loadImages(self, num):
-        service = MysqlService()
+        service = MysqlService(self.log)
         images = service.getImages(num)
         return images
     
     def handleArticles(self, articles):
+        self.log.printInfo("handleArticles start")
         processedArticles=[]
         imgs=list(self.images)
         for article in articles:
             article = self.mergeCover(article, imgs)
             processedArticles.append(self.handleArticle(article))
+        self.log.printInfo("handleArticles end")
         return processedArticles
 
 
     def mergeCover(self, article, imgs):
         if len(imgs)>0:
             article["image"]=imgs[0]["src"]
-            imgs[0]["ifused"]=1
+            imgs[0]["ifused"]=config.defaultIfused
             del imgs[0]
         else:
-            print "len(imgs): %d" %(len(imgs))
-            article["image"]="/static/images/website.jpg"
+            article["image"]=config.defaultCoverImages
         return article
         
     def handleArticle(self, article):
         article['content'], article['imageNum'], article['sumImageNum']=self.handleImageInContent(article['content'], article['url'])
+        self.log.printInfo("Article %s" %(str(article)))
         return article
     
     def handleImageInContent(self, content, source):
@@ -137,11 +147,10 @@ class Application(object):
             sumImag:the number of images include the images can not be resolved and external link images
         '''
         
-        result, number=self.regexSubn(content, r'<a href=".+?" target="_blank">', "")
-        result, numImg, sumImg=self.regexMethodImage(result, r'<img.+?/>', source)
-        result, number=self.regexSubn(result, r'-{3,}[\s\S]+-{3,}[\s\S]+</tbody>', "</tbody>")
-        result, numberSpecial=self.regexSubn(result, r"'", "\\'")
-        print "special char number: %s" %(numberSpecial)
+        result, number=self.regexSubn(content, config.regexA, config.replacementA)
+        result, numImg, sumImg=self.regexMethodImage(result, config.regexImages, source)
+        result, number=self.regexSubn(result, config.regexAds, config.replacementAds)
+        result, numberSpecial=self.regexSubn(result, config.regexSpCharSingleQuotes, config.replacementSpCharSingleQuotes)
         return result, numImg, sumImg
     
     def handleImages(self, images):
@@ -200,11 +209,11 @@ class Application(object):
         numImg=0
         regexImagesCount=0
         for image in images:
-            image, num=self.regexSubn(image, r'static/image/common/none\.gif', "static/images/common/none.gif")
-            groups=self.regexGroup(image, r'((data/attachment/forum/)\d*/\d*/(.+?\.\w{3,4}))')
+            image, num=self.regexSubn(image, config.regexNoneGIf, config.replacementNoneGIf)
+            groups=self.regexGroup(image, config.regexImagesUrl)
             if groups!=None and len(groups)>2:
-                newUrl="static/images/"+groups[2]
-                subnImage, numImg = self.regexSubn(image, r'((data/attachment/forum/)\d*/\d*/(.+?\.\w{3,4}))', newUrl)
+                newUrl=config.defaultImagesSrc+groups[2]
+                subnImage, numImg = self.regexSubn(image, config.regexImagesUrl, newUrl)
                 subnImages[groups[2]]=subnImage
                 contentImage = self.generateContentImage(groups, source)
                 #handle images save in content
@@ -214,23 +223,25 @@ class Application(object):
     
     def generateContentImage(self, groups, source):
         ContentImage={}
-        ContentImage["url"]=groups[0]
-        ContentImage["type"]=2
-        ContentImage["src"]="static/images/"+groups[2]
-        ContentImage["sourceArticles"]=source
-        ContentImage["ifused"]=1
-        ContentImage["ifdown"]=0
-        ContentImage["createtime"]=self.now
+        ContentImage["url"] = groups[0]
+        ContentImage["type"] = config.contentImageType
+        ContentImage["src"] = config.defaultImagesSrc+groups[2]
+        ContentImage["sourceArticles"] =source
+        ContentImage["ifused"] = config.defaultIfused
+        ContentImage["ifdown"] = config.defaultIfdown
+        ContentImage["createtime"] = self.now
         return ContentImage
         
         
     def outputData(self, articles):
+        self.log.printInfo("outputData start")
         redisArticles=self.generateRedisArticles(articles)
         self.factors['time']=self.getLastestDate(articles)
         self.markUsingImages()
         self.outputByRedis(redisArticles)
         self.outputByMysql(articles)
         self.outputFactors()
+        self.log.printInfo("outputData end")
         '''
         print "images: %s" %(str(self.images))
         print "contentImages: %s" %(str(self.contentImages))
@@ -239,12 +250,10 @@ class Application(object):
 
     def getLastestDate(self, articles):
         lastest = common.string_toDatetime(self.factors["time"])
-        print type(lastest)
         lastestDateTime = datetime.datetime(*lastest[0:6])
         lastestDate = common.date_toTimestamp(lastestDateTime)
         for article in articles:
             date=common.date_toTimestamp(article['editdate'])
-            print date
             if (date > lastestDate):
                 lastestDate = date
         lastestDatetime = common.timestamp_toDate(lastestDate)
@@ -259,11 +268,11 @@ class Application(object):
         
         '''
         try:
-            service = MysqlService()
+            service = MysqlService(self.log)
             service.updateImages(images)
             return True
         except Exception as e:
-            print "markCover error: '%s'" %(e)
+            self.log.printError("markCover error: '%s'" %(e)) 
             return False
     
     def markContentImages(self, images):
@@ -271,11 +280,11 @@ class Application(object):
             
         '''
         try:
-            service = MysqlService()
+            service = MysqlService(self.log)
             service.setImages(images)
             return True
         except Exception as e:
-            print "markContentImages error: '%s'" %(e)
+            self.log.printError("markContentImages error: '%s'" %(e)) 
             return False
 
     def generateRedisArticles(self, articles):
@@ -290,39 +299,39 @@ class Application(object):
         redisArticle["id"]=article["id"]
         redisArticle["url"]=article["url"]
         redisArticle["editdate"]=article["editdate"]
-        redisArticle["level"]=0
-        redisArticle["len"]=len(article["content"])
-        redisArticle["ctr"]=0
-        redisArticle["pn"]=0
-        redisArticle["pv"]=0
+        redisArticle["level"]=config.defaultLevel
+        redisArticle["len"] = len(article["content"])
+        redisArticle["ctr"] = config.defaultCtr
+        redisArticle["pn"] = config.defaultPn
+        redisArticle["pv"] = config.defaultPv
         redisArticle["image"]=article["imageNum"]
         redisArticle["sumImage"]=article["sumImageNum"]
         return redisArticle
         
     def outputByRedis(self, articles):
         try:
-            service = RedisService()
+            service = RedisService(self.log)
             return service.hsetArticles(articles)
         except Exception as e:
-            print "outputByRedis error: '%s'" %(e)
+            self.log.printError("outputByRedis error: '%s'" %(e))
             return False  
         
     def outputByMysql(self, articles):
         try:
-            service = MysqlService()
+            service = MysqlService(self.log)
             service.setArticles(articles)
             return True
         except Exception as e:
-            print "outputByMysql error: '%s'" %(e)
+            self.log.printError("outputByMysql error: '%s'" %(e))
             return False
     
     def outputFactors(self):
         try:
-            service = RedisService()
+            service = RedisService(self.log)
             service.setFactors(self.factors)
             return True
         except Exception as e:
-            print "outputFactors error: '%s'" %(e)
+            self.log.printError("outputFactors error: '%s'" %(e))
             return False
 	
 if __name__ == '__main__':
