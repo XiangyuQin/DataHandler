@@ -1,0 +1,11 @@
+Wed, 02 Mar 2016 22:15:12 Log.py[line:28] INFO program start,now:20160302221512
+Wed, 02 Mar 2016 22:15:12 Log.py[line:28] INFO loadData start
+Wed, 02 Mar 2016 22:15:12 Log.py[line:28] INFO loadData end,qualifiedArticles:0
+Wed, 02 Mar 2016 22:15:12 Log.py[line:28] INFO handleArticles start
+Wed, 02 Mar 2016 22:15:12 Log.py[line:28] INFO handleArticles end
+Wed, 02 Mar 2016 22:15:12 Log.py[line:28] INFO outputData start
+Wed, 02 Mar 2016 22:15:12 Log.py[line:28] INFO outputData end
+Wed, 02 Mar 2016 22:15:12 Log.py[line:28] INFO processedArticles:0, contentImages:0, images:0, factorsTime:2016-02-29 00:00:00
+Wed, 02 Mar 2016 22:15:12 Log.py[line:28] INFO program end,now:20160302221512
+Time:2016-02-29 00:00:00
+root        : INFO     program end,now:20160302221512

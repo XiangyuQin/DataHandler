@@ -24,6 +24,6 @@ replacementAds="</tbody>"
 replacementSpCharSingleQuotes="\\'"
 replacementNoneGIf="static/images/common/none.gif"
 
-logSrc='log/'
+logSrc='logs/'
 logMaxBytes=10*1024*1024
 logBackupCount=5

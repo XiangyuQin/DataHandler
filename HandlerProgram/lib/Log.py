@@ -9,7 +9,7 @@ from logging.handlers import RotatingFileHandler
 class Log(object):
     def __init__(self, dt):
         now = common.datetime_toStringYMDHMS(dt)
-        app_name = config.logSrc+'myapp%s.log' %(now)
+        app_name = config.logSrc+'DataHandler%s.log' %(now)
         logging.basicConfig(level=logging.DEBUG,
                 format='%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s',
                 datefmt='%a, %d %b %Y %H:%M:%S',
