@@ -43,9 +43,9 @@ class MysqlService(object):
         try:
             for article in articles:
                 sql="INSERT INTO articles(id, \
-                title, url, image, date, type_id, writer, content) \
-                VALUES ('%d', '%s', '%s', '%s', '%s', '%s', '%s', '%s')" % \
-                (article['id'], article['title'], article['url'], article['image'], article['editdate'], config.defaultTypeId, article['writer'], article['content'])
+                title, url, image, date, brief ,type_id, writer, content) \
+                VALUES ('%d', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')" % \
+                (article['id'], article['title'], article['url'], article['image'], article['editdate'], article['brief'], config.defaultTypeId, article['writer'], article['content'])
                 sql_test=sql
                 cursor.execute(sql)
                 self.db.commit()

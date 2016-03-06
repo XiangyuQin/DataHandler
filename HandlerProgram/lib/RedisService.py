@@ -1,6 +1,7 @@
 ﻿# -*- coding: UTF-8 -*-
 import redis
 import common
+import simplejson
 from Log import Log
 
 class RedisService(object):
@@ -23,7 +24,8 @@ class RedisService(object):
     def hsetArticles(self, articles):
         try:
             for article in articles:
-                self.r.hset('articles', article['id'], article)
+                json_article=simplejson.dumps(article)
+                self.r.hset('articles', article['id'], json_article)
             return True
         except Exception as e:
             self.log.printError("hsetArticles: %s" % (e))

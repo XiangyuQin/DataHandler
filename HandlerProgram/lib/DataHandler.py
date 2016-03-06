@@ -127,8 +127,25 @@ class Application(object):
         
     def handleArticle(self, article):
         article['content'], article['imageNum'], article['sumImageNum']=self.handleImageInContent(article['content'], article['url'])
+        article['writer']=self.getWriter(config.writer)
+        article['brief']=self.getBrief(article['content'])
         self.log.printInfo("Article %s" %(str(article)))
         return article
+    
+    def getWriter(self, writer):
+        return writer
+        
+    def getBrief(self, content):
+        regexBrief = config.regexBrief
+        brief=""
+        groups = self.regexGroup(content, regexBrief)
+        if groups!=None and len(groups)>0:
+            if(len(groups[0])>config.briefLimit):
+                brief = groups[0][0:config.briefLimit]
+            else:
+                brief = groups[0]
+        return brief
+    
     
     def handleImageInContent(self, content, source):
         '''handle Image Content
@@ -168,6 +185,7 @@ class Application(object):
             return m.groups()
         else:
             return ()
+        
         
     def regexMethodImage(self, content, regex, source):
         '''handle Content to collect <img …… /> ,result 
@@ -305,7 +323,7 @@ class Application(object):
         redisArticle["ctr"] = config.defaultCtr
         redisArticle["pn"] = config.defaultPn
         redisArticle["pv"] = config.defaultPv
-        redisArticle["image"]=article["imageNum"]
+        redisArticle["imageNum"]=article["imageNum"]
         redisArticle["sumImage"]=article["sumImageNum"]
         return redisArticle
         

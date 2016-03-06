@@ -11,6 +11,7 @@ defaultPn=0
 defaultPv=0
 
 contentImageType=2
+writer="test"
 
 regexA=r'<a href=".+?" target="_blank">'
 regexImages=r'<img.+?/>'
@@ -18,6 +19,7 @@ regexAds=r'-{3,}[\s\S]+-{3,}[\s\S]+</tbody>'
 regexSpCharSingleQuotes=r"'"
 regexNoneGIf=r'static/image/common/none\.gif'
 regexImagesUrl=r'((data/attachment/forum/)\d*/\d*/(.+?\.\w{3,4}))'
+regexBrief=r'([^\x00-\xff]{30,})'
 
 replacementA=""
 replacementAds="</tbody>"
@@ -27,3 +29,5 @@ replacementNoneGIf="static/images/common/none.gif"
 logSrc='logs/'
 logMaxBytes=10*1024*1024
 logBackupCount=5
+
+briefLimit=300
